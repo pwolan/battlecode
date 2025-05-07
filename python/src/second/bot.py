@@ -1,6 +1,7 @@
 import random
 
 from battlecode25.stubs import *
+# from battlecode25.engine.game.robot_controller import RobotError
 
 # This is an example bot written by the developers!
 # Use this to help write your own code, or run it against your bot to see how well you can do!
@@ -18,7 +19,7 @@ directions = [
     Direction.WEST,
     Direction.NORTHWEST,
 ]
-
+known_ruins = []
 
 def turn():
     """
@@ -46,7 +47,7 @@ def run_tower():
     next_loc = get_location().add(dir)
 
     # Pick a random robot type to build.
-    robot_type = random.randint(0, 2)
+    robot_type = random.randint(0, 0)
     if robot_type == 0 and can_build_robot(UnitType.SOLDIER, next_loc):
         build_robot(UnitType.SOLDIER, next_loc)
         log("BUILT A SOLDIER")
@@ -55,26 +56,65 @@ def run_tower():
         log("BUILT A MOPPER")
     if robot_type == 2 and can_build_robot(UnitType.SPLASHER, next_loc):
         set_indicator_string("SPLASHER NOT IMPLEMENTED YET");
-        #build_robot(RobotType.SPLASHER, next_loc)
-        #log("BUILT A SPLASHER")
+        build_robot(UnitType.SPLASHER, next_loc)
+        log("BUILT A SPLASHER")
 
     # Read incoming messages
     messages = read_messages()
     for m in messages:
         log(f"Tower received message: '#{m.get_sender_id()}: {m.get_bytes()}'")
 
-    # TODO: can we attack other bots?
+    # Broadcast seen ruins
+    nearby_tiles = sense_nearby_map_infos()
+    for tile in nearby_tiles:
+        if tile.has_ruin():
+            loc = tile.get_map_location()
+            for ally in sense_nearby_robots(team=get_team()):
+                if can_send_message(ally.location):
+                    encoded = (0 << 16) | (loc.x << 8) | loc.y
+                    send_message(ally.location, encoded)
 
-
+def is_on_map(loc: MapLocation) -> bool:
+    try:
+        sense_map_info(loc)
+        return True
+    except:
+        return False
+    
 def run_soldier():
+    # Read shared ruin locations
+    messages = read_messages()
+    for m in messages:
+        m = m.get_bytes()
+        tag = (m >> 16) & 0xF
+        x = (m >> 8) & 0xFF
+        y = m & 0xFF
+        if tag == 0:  # 0 = RUIN message
+            loc = MapLocation(x, y)
+            if loc not in known_ruins:
+                known_ruins.append(loc)
+
     # Sense information about all visible nearby tiles.
     nearby_tiles = sense_nearby_map_infos()
 
-    # Search for a nearby ruin to complete.
+    # Check for visible ruins first
     cur_ruin = None
     for tile in nearby_tiles:
         if tile.has_ruin():
             cur_ruin = tile
+            loc = tile.get_map_location()
+            if loc not in known_ruins:
+                known_ruins.append(loc)
+
+    # If no visible ruins, go to remembered ones
+    if cur_ruin is None and known_ruins:
+        # Clean up ruins that no longer exist
+        valid_ruins = []
+        for loc in known_ruins:
+            if is_on_map(loc) and sense_map_info(loc).has_ruin():
+                cur_ruin = sense_map_info(loc)
+                valid_ruins.append(loc)
+        known_ruins[:] = valid_ruins
 
     if cur_ruin is not None:
         target_loc = cur_ruin.get_map_location()
