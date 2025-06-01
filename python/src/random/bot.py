@@ -46,7 +46,7 @@ def run_tower():
     next_loc = get_location().add(dir)
 
     # Pick a random robot type to build.
-    robot_type = random.randint(0, 0)
+    robot_type = random.randint(0, 1)
     if robot_type == 0 and can_build_robot(UnitType.SOLDIER, next_loc):
         build_robot(UnitType.SOLDIER, next_loc)
         log("BUILT A SOLDIER")
@@ -122,7 +122,7 @@ def run_mopper():
         move(dir)
     if can_mop_swing(dir):
         mop_swing(dir)
-        log("Mop Swing! Booyah!");
+        # log("Mop Swing! Booyah!");
     elif can_attack(next_loc):
         attack(next_loc)
 
