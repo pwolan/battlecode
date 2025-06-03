@@ -1,5 +1,6 @@
 from battlecode25.stubs import *
-from roles import run_soldier, run_mopper, run_tower
+from roles import run_mopper, run_tower
+from run_soldier import run_soldier
 from game_state import increment_turn
 
 

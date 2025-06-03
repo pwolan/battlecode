@@ -3,6 +3,7 @@
 turn_count = 0
 known_ruins = []
 painting_turns = {}
+save_turns = 0
 
 def increment_turn():
     global turn_count
@@ -27,3 +28,15 @@ def get_painting_turns(robot_id):
 
 def increment_painting_turn(robot_id):
     painting_turns[robot_id] = get_painting_turns(robot_id) + 1
+
+def set_save_turns(turns):
+    global save_turns
+    save_turns = turns
+
+def decrement_save_turns():
+    global save_turns
+    if save_turns > 0:
+        save_turns -= 1
+
+def should_save():
+    return save_turns > 0
