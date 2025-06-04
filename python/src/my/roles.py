@@ -2,7 +2,7 @@
 
 from battlecode25.stubs import *
 import random
-from utils import directions
+from utils import MessageType, directions
 import game_state
 
 def run_tower():
@@ -24,9 +24,10 @@ def read_msgs():
     messages = read_messages()
     for m in messages:
         log(f"Tower received message: '#{m.get_sender_id()}: {m.get_bytes()}'")
-        broadcast_message(m.get_bytes())
-        if m.get_bytes() == 1: # Build a tower request
-            game_state.set_save_turns(200)
+        # broadcast_message(m.get_bytes())
+        if m.get_bytes() == MessageType.BUILD_TOWER.value: # Build a tower request
+            if not game_state.should_save():
+                game_state.set_save_turns(200)
 
 
 def broadcast_ruin_locations():
@@ -35,7 +36,7 @@ def broadcast_ruin_locations():
             loc = tile.get_map_location()
             for ally in sense_nearby_robots(team=get_team()):
                 if can_send_message(ally.location):
-                    encoded = (0 << 16) | (loc.x << 8) | loc.y
+                    encoded = (MessageType.RUIN_LOCATION.value << 16) | (loc.x << 8) | loc.y
                     send_message(ally.location, encoded)
 
 
