@@ -30,3 +30,28 @@ def is_tower_pattern_complete(unit_type, loc):
         if pattern_tile.get_mark() != PaintType.EMPTY and pattern_tile.get_mark() != pattern_tile.get_paint():
             return False
     return True
+
+def is_enemy_visible(loc):
+    # Sprawdza, czy w danej lokacji jest widoczny wróg
+    enemies = sense_nearby_robots(team=get_team().opponent())
+    if enemies:
+        return True
+    return False
+
+def my_max(seq, key=lambda x: x):
+    if len(seq) == 0:
+        raise ValueError("my_max() arg is an empty sequence")
+
+    best_item = seq[0]
+    best_value = key(best_item)
+
+    i = 1
+    while i < len(seq):
+        item = seq[i]
+        val = key(item)
+        if val > best_value:
+            best_value = val
+            best_item = item
+        i += 1
+
+    return best_item

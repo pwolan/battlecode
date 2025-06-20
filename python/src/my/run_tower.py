@@ -1,9 +1,9 @@
-# roles.py
-
 from battlecode25.stubs import *
 import random
 from utils import MessageType, directions
 import game_state
+
+what_build_next = None
 
 def run_tower():
     dir = random.choice(directions)
@@ -13,12 +13,29 @@ def run_tower():
     if game_state.should_save():
         game_state.decrement_save_turns()
     else:
-        if can_build_robot(UnitType.SOLDIER, next_loc):
-            build_robot(UnitType.SOLDIER, next_loc)
-            log("BUILT A SOLDIER")
+        spawn(next_loc)
 
     read_msgs()
     broadcast_ruin_locations()
+
+def decide_what_next():
+    global what_build_next
+    if what_build_next is None:
+        if get_round_num() < 300:
+            what_build_next = UnitType.SOLDIER
+        else:
+            what_build_next = random.choice([UnitType.SOLDIER, UnitType.MOPPER])
+    return what_build_next
+
+def spawn(next_loc):
+    global what_build_next
+    if what_build_next is None:
+        what_build_next = decide_what_next()
+
+    if can_build_robot(what_build_next, next_loc):
+        build_robot(what_build_next, next_loc)
+        log(f"BUILT A {what_build_next}")
+        what_build_next = None
 
 def read_msgs():
     messages = read_messages()
@@ -29,7 +46,6 @@ def read_msgs():
             if not game_state.should_save():
                 game_state.set_save_turns(200)
 
-
 def broadcast_ruin_locations():
     for tile in sense_nearby_map_infos():
         if tile.has_ruin():
@@ -38,25 +54,3 @@ def broadcast_ruin_locations():
                 if can_send_message(ally.location):
                     encoded = (MessageType.RUIN_LOCATION.value << 16) | (loc.x << 8) | loc.y
                     send_message(ally.location, encoded)
-
-
-def run_mopper():
-    dir = random.choice(directions)
-    next_loc = get_location().add(dir)
-    if can_move(dir):
-        move(dir)
-    if can_mop_swing(dir):
-        mop_swing(dir)
-    elif can_attack(next_loc):
-        attack(next_loc)
-
-    update_enemy_robots()
-
-def update_enemy_robots():
-    enemies = sense_nearby_robots(team=get_team().opponent())
-    if enemies:
-        set_indicator_string("There are nearby enemy robots! Scary!")
-        if get_round_num() % 20 == 0:
-            for ally in sense_nearby_robots(team=get_team()):
-                if can_send_message(ally.location):
-                    send_message(ally.location, len(enemies))
