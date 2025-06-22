@@ -2,7 +2,7 @@ from battlecode25.stubs import *
 import random
 from utils import MessageType, directions, has_ruin_without_tower, is_tower_pattern_complete
 import game_state
-from utils import has_tower
+from utils import has_tower, enemy_or_empty_tiles_in_range
 
 def run_soldier():
     # read messages and update knowledge
@@ -25,9 +25,6 @@ def run_soldier():
             game_state.add_known_ruin(loc)
             cur_ruin = tile
 
-
-
-    robot_id = get_id()
     if cur_ruin:
         # painting_turns = game_state.get_painting_turns(robot_id)
         # if painting_turns % 3 == 0:
@@ -86,6 +83,17 @@ def run_soldier():
 
     if not sense_map_info(get_location()).get_paint().is_ally() and can_attack(get_location()):
         attack(get_location())
+
+    # try to get paint from tower
+    nearby_tiles = sense_nearby_map_infos()
+    for tile in nearby_tiles:
+        loc = tile.get_map_location()
+        if has_tower(loc):
+            needs = 200 - get_paint()
+            if can_transfer_paint(loc,-needs):
+                transfer_paint(loc, -needs)
+                # log(f"Got paint from tower at {loc}")
+                break
 
 def read_msgs():
     for m in read_messages():

@@ -16,6 +16,7 @@ directions = [
 class MessageType(Enum):
     RUIN_LOCATION = 0
     BUILD_TOWER = 1
+    ENEMY_TILES = 2
 
 def has_tower(loc):
     # Possible todo: tile.has_ruin()
@@ -55,3 +56,36 @@ def my_max(seq, key=lambda x: x):
         i += 1
 
     return best_item
+
+def my_min(seq, key=lambda x: x):
+    if len(seq) == 0:
+        raise ValueError("my_min() arg is an empty sequence")
+
+    best_item = seq[0]
+    best_value = key(best_item)
+
+    i = 1
+    while i < len(seq):
+        item = seq[i]
+        val = key(item)
+        if val < best_value:
+            best_value = val
+            best_item = item
+        i += 1
+
+    return best_item
+
+
+def enemy_or_empty_tiles_in_range(loc, radius=4):
+    # sprawdza ilość zamalowanych kafelków przez przeciwnika w zasięgu radius
+    count = 0
+    for tile in sense_nearby_map_infos(loc, radius):
+        has_enemy_paint = tile.get_paint() == PaintType.ENEMY_PRIMARY or tile.get_paint() == PaintType.ENEMY_SECONDARY
+        is_empty = tile.get_paint() == PaintType.EMPTY
+        has_no_ruins = not tile.has_ruin()
+        is_not_wall = not tile.is_wall()
+        if has_enemy_paint or (is_empty and has_no_ruins and is_not_wall):
+            count += 1
+
+    # log("Counting enemy tiles in range of " + str(loc) + ": " + str(count))
+    return count

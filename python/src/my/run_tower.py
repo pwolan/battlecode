@@ -21,10 +21,10 @@ def run_tower():
 def decide_what_next():
     global what_build_next
     if what_build_next is None:
-        if get_round_num() < 300:
+        if get_round_num() < 200:
             what_build_next = UnitType.SOLDIER
         else:
-            what_build_next = random.choice([UnitType.SOLDIER, UnitType.MOPPER])
+            what_build_next = random.choice([UnitType.SOLDIER, UnitType.MOPPER, UnitType.SPLASHER])
     return what_build_next
 
 def spawn(next_loc):
@@ -34,13 +34,13 @@ def spawn(next_loc):
 
     if can_build_robot(what_build_next, next_loc):
         build_robot(what_build_next, next_loc)
-        log(f"BUILT A {what_build_next}")
+        # log(f"BUILT A {what_build_next}")
         what_build_next = None
 
 def read_msgs():
     messages = read_messages()
     for m in messages:
-        log(f"Tower received message: '#{m.get_sender_id()}: {m.get_bytes()}'")
+        # log(f"Tower received message: '#{m.get_sender_id()}: {m.get_bytes()}'")
         # broadcast_message(m.get_bytes())
         if m.get_bytes() == MessageType.BUILD_TOWER.value: # Build a tower request
             if not game_state.should_save():

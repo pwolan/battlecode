@@ -124,10 +124,10 @@ def run_tower():
         robot_type = random.randint(0, 2)
         if robot_type <= 2 and can_build_robot(UnitType.SOLDIER, next_loc):
             build_robot(UnitType.SOLDIER, next_loc) #for now, always build soldiers
-            log("BUILT A SOLDIER")
-        # if robot_type == 1 and can_build_robot(UnitType.MOPPER, next_loc):
-        #     build_robot(UnitType.MOPPER, next_loc)
-        #     log("BUILT A MOPPER")
+            # log("BUILT A SOLDIER")
+        if robot_type == 1 and can_build_robot(UnitType.MOPPER, next_loc):
+            build_robot(UnitType.MOPPER, next_loc)
+            # log("BUILT A MOPPER")
         # if robot_type == 2 and can_build_robot(UnitType.SPLASHER, next_loc):
         #     set_indicator_string("SPLASHER NOT IMPLEMENTED YET")
         #     #build_robot(RobotType.SPLASHER, next_loc)
@@ -140,7 +140,7 @@ def run_tower():
     # Read incoming messages
     messages = read_messages()
     for m in messages:
-        log(f"Tower received message: '#{m.get_sender_id()}: {m.get_bytes()}'")
+        # log(f"Tower received message: '#{m.get_sender_id()}: {m.get_bytes()}'")
 
         # If we are not currently saving and we receive the save chips message, start saving
         if not should_save and m.get_bytes() == int(MessageType.SAVE_CHIPS):
@@ -302,7 +302,7 @@ def run_mopper():
         move(dir)
     if can_mop_swing(dir):
         mop_swing(dir)
-        log("Mop Swing! Booyah!")
+        # log("Mop Swing! Booyah!")
     elif can_attack(next_loc):
         attack(next_loc)
 
@@ -367,7 +367,7 @@ def check_nearby_ruins():
 
 
 def update_enemy_robots():
-    # Sensing methods can be passed in a radius of -1 to automatically 
+    # Sensing methods can be passed in a radius of -1 to automatically
     # use the largest possible value.
     enemy_robots = sense_nearby_robots(team=get_team().opponent())
     if len(enemy_robots) == 0:
@@ -423,7 +423,7 @@ def bug1(target):
         # in tracing mode
 
         # need a stopping condition - this will be when we see the closest location again
-        if closest_location is not None and get_location() == closest_location: 
+        if closest_location is not None and get_location() == closest_location:
             # reset global tracing variables
             is_tracing = False
             smallest_distance = 10000000
@@ -437,7 +437,7 @@ def bug1(target):
             if dist_to_target < smallest_distance:
                 smallest_distance = dist_to_target
                 closest_location = get_location()
-            
+
             # go along perimeter of obstacle
             if can_move(tracing_dir):
                 # move forward & try to turn right
@@ -453,7 +453,7 @@ def bug1(target):
                         tracing_dir = tracing_dir.rotate_right()
                         tracing_dir = tracing_dir.rotate_right()
                         break
-            
+
 #Bug 2
 
 def bug2(target):
@@ -473,7 +473,7 @@ def bug2(target):
             obstacle_start_dist = get_location().distance_squared_to(target)
             tracing_dir = dir_to_target
     else:
-        if (get_location() in line 
+        if (get_location() in line
                 and get_location().distance_squared_to(target) < obstacle_start_dist):
             is_tracing = False
             return
